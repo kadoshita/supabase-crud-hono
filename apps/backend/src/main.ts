@@ -1,4 +1,6 @@
 import fastify from 'fastify';
+import cors from '@fastify/cors';
+
 import { registerRoutes } from './routes';
 import { config } from 'dotenv';
 
@@ -11,6 +13,7 @@ if (process.env.NODE_ENV !== 'production') {
 const app = fastify({
   logger: true,
 });
+app.register(cors);
 
 registerRoutes(app);
 

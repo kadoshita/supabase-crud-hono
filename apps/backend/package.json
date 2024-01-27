@@ -17,6 +17,7 @@
   "author": "sublimer <sublimer.me@gmail.com> (https://sublimer.me/)",
   "license": "MIT",
   "dependencies": {
+    "@fastify/cors": "^9.0.0",
     "dotenv": "^16.4.1",
     "drizzle-orm": "^0.29.3",
     "fastify": "^4.25.2",
