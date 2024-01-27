@@ -1,0 +1,33 @@
+{
+  "name": "backend",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/main.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "NODE_ENV=production node -r dotenv/config build/main.js dotenv_config_path=.env.production",
+    "test": "vitest",
+    "db:generate": "drizzle-kit generate:pg",
+    "db:push": "drizzle-kit push:pg",
+    "db:push:production": "NODE_ENV=production drizzle-kit push:pg",
+    "postgres:start": "docker run --rm -d --name postgres -p 5432:5432 -v $(pwd)/postgres:/var/lib/postgres -e POSTGRES_PASSWORD=postgres postgres:15.5",
+    "postgres:stop": "docker stop postgres"
+  },
+  "author": "sublimer <sublimer.me@gmail.com> (https://sublimer.me/)",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.1",
+    "drizzle-orm": "^0.29.3",
+    "fastify": "^4.25.2",
+    "postgres": "^3.4.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.11.5",
+    "drizzle-kit": "^0.20.13",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.1"
+  }
+}
