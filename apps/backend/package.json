@@ -25,6 +25,7 @@
     "postgres": "^3.4.3"
   },
   "devDependencies": {
+    "@fastify/swagger": "^8.14.0",
     "@types/jest": "^29.5.11",
     "@types/node": "^20.11.5",
     "drizzle-kit": "^0.20.13",
