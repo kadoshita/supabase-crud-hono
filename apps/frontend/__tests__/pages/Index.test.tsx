@@ -1,12 +1,15 @@
 import { randomUUID } from 'crypto';
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
-import { render } from './utils';
-import App from '../src/App';
-import { MockInstance, vi } from 'vitest';
+import { render } from '../utils';
+import { MockInstance, vi, expect } from 'vitest';
+import Index from '../../src/pages/Index';
+import * as useSession from '../../src/hooks/useSession';
+import { Session } from '@supabase/supabase-js';
 
-describe('App', () => {
+describe('Index', () => {
   let fetchMock: MockInstance;
+  let getSessionMock: MockInstance;
 
   beforeEach(() => {
     fetchMock = vi
@@ -36,16 +39,27 @@ describe('App', () => {
           }
         }
       );
+
+    getSessionMock = vi
+      .spyOn(useSession, 'useSession')
+      .mockImplementation(() => {
+        return [
+          {
+            access_token: 'token',
+          } as Session,
+          async () => {
+            return { access_token: 'token' } as Session;
+          },
+        ];
+      });
   });
   afterEach(() => {
     fetchMock.mockRestore();
+    getSessionMock.mockRestore();
   });
 
   test('初回レンダー時にユーザー一覧取得APIを呼び出し、結果をtableに表示していること', async () => {
-    render(<App></App>);
-    expect(fetchMock).toHaveBeenCalledWith(
-      `${process.env.VITE_API_BASE_URL}/api/v1/users`
-    );
+    render(<Index></Index>);
 
     await waitFor(() => {
       expect(screen.getByText('test1')).toBeInTheDocument();
@@ -56,5 +70,14 @@ describe('App', () => {
     await waitFor(() => {
       expect(screen.getByText('test3')).toBeInTheDocument();
     });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${process.env.VITE_API_BASE_URL}/api/v1/users`,
+      {
+        headers: {
+          Authorization: 'Bearer token',
+        },
+      }
+    );
   });
 });

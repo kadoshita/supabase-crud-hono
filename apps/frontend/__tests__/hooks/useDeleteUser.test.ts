@@ -56,7 +56,7 @@ describe('useDeleteUser', () => {
 
     const userId = randomUUID();
 
-    act(() => result.current[1]({ id: userId }));
+    act(() => result.current[1]({ id: userId, idToken: 'token' }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       `${process.env.VITE_API_BASE_URL}/api/v1/users/${userId}`,
@@ -64,6 +64,7 @@ describe('useDeleteUser', () => {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer token`,
         },
         body: JSON.stringify({}),
       }

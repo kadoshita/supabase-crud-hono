@@ -7,11 +7,18 @@ export type User = {
   name: string;
 };
 
-export const useFetchUsers = (): [User[], () => void] => {
+export const useFetchUsers = (): [
+  User[],
+  (params: { idToken: string }) => void
+] => {
   const [users, setUsers] = useState<User[]>([]);
 
-  const fetchUsers = () => {
-    fetch(`${API_BASE_URL}/api/v1/users`)
+  const fetchUsers = ({ idToken }: { idToken: string }) => {
+    fetch(`${API_BASE_URL}/api/v1/users`, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    })
       .then((res) => res.json())
       .then((data) => setUsers(data));
   };

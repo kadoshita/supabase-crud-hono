@@ -52,10 +52,15 @@ describe('useFetchUsers', () => {
 
     expect(result.current[0]).toEqual([]);
 
-    act(() => result.current[1]());
+    act(() => result.current[1]({ idToken: 'token' }));
 
     expect(fetchMock).toHaveBeenCalledWith(
-      `${process.env.VITE_API_BASE_URL}/api/v1/users`
+      `${process.env.VITE_API_BASE_URL}/api/v1/users`,
+      {
+        headers: {
+          Authorization: `Bearer token`,
+        },
+      }
     );
 
     await waitFor(() => expect(result.current[0].length).toBe(3));

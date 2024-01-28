@@ -28,3 +28,5 @@ jobs:
       - run: npm -w apps/frontend test
         env:
           VITE_API_BASE_URL: http://localhost:3000
+          VITE_SUPABASE_PROJECT: test
+          VITE_SUPABASE_API_KEY: test

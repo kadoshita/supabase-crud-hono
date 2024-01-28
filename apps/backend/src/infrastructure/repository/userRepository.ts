@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
-import { User } from '../../domain/user';
-import { UserRepositoryInterface } from '../../domain/userRepositoryInterface';
+import { User } from '../../domain/user/user';
+import { UserRepositoryInterface } from '../../domain/user/userRepositoryInterface';
 import { db } from '../external/postgres';
 import { users } from '../../db/schema';
 import { eq } from 'drizzle-orm';

@@ -52,7 +52,7 @@ describe('useCreateUser', () => {
 
     expect(result.current[0]).toBeUndefined();
 
-    act(() => result.current[1]({ name: 'test' }));
+    act(() => result.current[1]({ name: 'test', idToken: 'token' }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       `${process.env.VITE_API_BASE_URL}/api/v1/users`,
@@ -60,6 +60,7 @@ describe('useCreateUser', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer token`,
         },
         body: JSON.stringify({ name: 'test' }),
       }

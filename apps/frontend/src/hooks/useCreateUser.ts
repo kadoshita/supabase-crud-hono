@@ -9,15 +9,16 @@ export type User = {
 
 export const useCreateUser = (): [
   User | undefined,
-  (args: { name: string }) => void
+  (args: { name: string; idToken: string }) => void
 ] => {
   const [user, setUser] = useState<User>();
 
-  const createUser = ({ name }: { name: string }) => {
+  const createUser = ({ name, idToken }: { name: string; idToken: string }) => {
     fetch(`${API_BASE_URL}/api/v1/users`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`,
       },
       body: JSON.stringify({ name }),
     })

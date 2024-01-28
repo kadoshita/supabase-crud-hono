@@ -44,3 +44,6 @@ jobs:
           DB_USER: postgres
           DB_PASSWORD: postgres
           DB_NAME: postgres
+          SUPABASE_URL: https://example.com
+          SUPABASE_API_KEY: test
+
