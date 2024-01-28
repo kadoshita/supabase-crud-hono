@@ -6,39 +6,22 @@ import { MockInstance, vi, expect } from 'vitest';
 import Index from '../../src/pages/Index';
 import * as useSession from '../../src/hooks/useSession';
 import { Session } from '@supabase/supabase-js';
+import { ApiClient } from '../../src/libs/api';
 
 describe('Index', () => {
-  let fetchMock: MockInstance;
+  let getUsersApiMock: MockInstance;
   let getSessionMock: MockInstance;
 
   beforeEach(() => {
-    fetchMock = vi
-      .spyOn(global, 'fetch')
-      .mockImplementation(
-        async (
-          input: Parameters<typeof fetch>[0],
-          options: Parameters<typeof fetch>[1]
-        ) => {
-          if (options && options.method === 'POST') {
-            if (options.body) {
-              const body = JSON.parse(options.body.toString());
-              return new Response(
-                JSON.stringify({ id: randomUUID(), name: body.name ?? '' })
-              );
-            } else {
-              return new Response(JSON.stringify({}));
-            }
-          } else {
-            return new Response(
-              JSON.stringify([
-                { id: randomUUID(), name: 'test1' },
-                { id: randomUUID(), name: 'test2' },
-                { id: randomUUID(), name: 'test3' },
-              ])
-            );
-          }
-        }
-      );
+    getUsersApiMock = vi
+      .spyOn(ApiClient.prototype, 'getUsers')
+      .mockImplementation(async () => {
+        return [
+          { id: randomUUID(), name: 'test1' },
+          { id: randomUUID(), name: 'test2' },
+          { id: randomUUID(), name: 'test3' },
+        ];
+      });
 
     getSessionMock = vi
       .spyOn(useSession, 'useSession')
@@ -54,7 +37,7 @@ describe('Index', () => {
       });
   });
   afterEach(() => {
-    fetchMock.mockRestore();
+    getUsersApiMock.mockRestore();
     getSessionMock.mockRestore();
   });
 
@@ -71,13 +54,6 @@ describe('Index', () => {
       expect(screen.getByText('test3')).toBeInTheDocument();
     });
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      `${process.env.VITE_API_BASE_URL}/api/v1/users`,
-      {
-        headers: {
-          Authorization: 'Bearer token',
-        },
-      }
-    );
+    expect(getUsersApiMock).toHaveBeenCalled();
   });
 });

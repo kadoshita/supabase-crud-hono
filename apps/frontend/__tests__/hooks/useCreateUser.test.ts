@@ -3,41 +3,22 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { MockInstance, vi } from 'vitest';
 import { act } from 'react-dom/test-utils';
 import { useCreateUser } from '../../src/hooks/useCreateUser';
+import { ApiClient } from '../../src/libs/api';
 
 describe('useCreateUser', () => {
-  let fetchMock: MockInstance;
+  let createUserApiMock: MockInstance;
 
   beforeEach(() => {
-    fetchMock = vi
-      .spyOn(global, 'fetch')
+    createUserApiMock = vi
+      .spyOn(ApiClient.prototype, 'createUser')
       .mockImplementation(
-        async (
-          input: Parameters<typeof fetch>[0],
-          options: Parameters<typeof fetch>[1]
-        ) => {
-          if (options && options.method === 'POST') {
-            if (options.body) {
-              const body = JSON.parse(options.body.toString());
-              return new Response(
-                JSON.stringify({ id: randomUUID(), name: body.name ?? '' })
-              );
-            } else {
-              return new Response(JSON.stringify({}));
-            }
-          } else {
-            return new Response(
-              JSON.stringify([
-                { id: randomUUID(), name: 'test1' },
-                { id: randomUUID(), name: 'test2' },
-                { id: randomUUID(), name: 'test3' },
-              ])
-            );
-          }
+        async (params: Parameters<ApiClient['createUser']>[0]) => {
+          return { id: randomUUID(), name: params.name ?? '' };
         }
       );
   });
   afterEach(() => {
-    fetchMock.mockRestore();
+    createUserApiMock.mockRestore();
   });
 
   test('usersとcreateUserの関数を返すこと', () => {
@@ -54,17 +35,7 @@ describe('useCreateUser', () => {
 
     act(() => result.current[1]({ name: 'test', idToken: 'token' }));
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      `${process.env.VITE_API_BASE_URL}/api/v1/users`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer token`,
-        },
-        body: JSON.stringify({ name: 'test' }),
-      }
-    );
+    expect(createUserApiMock).toHaveBeenCalledWith({ name: 'test' });
 
     await waitFor(() => expect(result.current[0]).not.toBeUndefined());
 

@@ -72,6 +72,14 @@ function v1ApiRoutes(
                 id: { type: 'string', format: 'uuid' },
                 name: { type: 'string' },
               },
+              required: ['id', 'name'],
+            },
+          },
+          401: {
+            description: 'Unauthorized',
+            type: 'object',
+            properties: {
+              message: { type: 'string' },
             },
           },
         },
@@ -99,6 +107,14 @@ function v1ApiRoutes(
             properties: {
               id: { type: 'string', format: 'uuid' },
               name: { type: 'string' },
+            },
+            required: ['id', 'name'],
+          },
+          401: {
+            description: 'Unauthorized',
+            type: 'object',
+            properties: {
+              message: { type: 'string' },
             },
           },
         },
@@ -128,6 +144,14 @@ function v1ApiRoutes(
               id: { type: 'string', format: 'uuid' },
               name: { type: 'string' },
             },
+            required: ['id', 'name'],
+          },
+          401: {
+            description: 'Unauthorized',
+            type: 'object',
+            properties: {
+              message: { type: 'string' },
+            },
           },
         },
         security: [{ bearerAuth: [] }],
@@ -151,9 +175,12 @@ function v1ApiRoutes(
           200: {
             description: 'Successful response',
             type: 'object',
+          },
+          401: {
+            description: 'Unauthorized',
+            type: 'object',
             properties: {
-              id: { type: 'string', format: 'uuid' },
-              name: { type: 'string' },
+              message: { type: 'string' },
             },
           },
         },

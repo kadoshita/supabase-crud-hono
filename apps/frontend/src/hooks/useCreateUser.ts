@@ -1,6 +1,5 @@
 import { useState } from 'react';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { ApiClient } from '../libs/api';
 
 export type User = {
   id: string;
@@ -14,15 +13,11 @@ export const useCreateUser = (): [
   const [user, setUser] = useState<User>();
 
   const createUser = ({ name, idToken }: { name: string; idToken: string }) => {
-    fetch(`${API_BASE_URL}/api/v1/users`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${idToken}`,
-      },
-      body: JSON.stringify({ name }),
-    })
-      .then((res) => res.json())
+    const client = new ApiClient(idToken);
+    client
+      .createUser({
+        name,
+      })
       .then((data) => setUser(data));
   };
 

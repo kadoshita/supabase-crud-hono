@@ -3,43 +3,20 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { MockInstance, vi } from 'vitest';
 import { act } from 'react-dom/test-utils';
 import { useDeleteUser } from '../../src/hooks/useDeleteUser';
+import { ApiClient } from '../../src/libs/api';
 
 describe('useDeleteUser', () => {
-  let fetchMock: MockInstance;
+  let deleteUserApiMock: MockInstance;
 
   beforeEach(() => {
-    fetchMock = vi
-      .spyOn(global, 'fetch')
-      .mockImplementation(
-        async (
-          input: Parameters<typeof fetch>[0],
-          options: Parameters<typeof fetch>[1]
-        ) => {
-          if (options && options.method === 'POST') {
-            if (options.body) {
-              const body = JSON.parse(options.body.toString());
-              return new Response(
-                JSON.stringify({ id: randomUUID(), name: body.name ?? '' })
-              );
-            } else {
-              return new Response(JSON.stringify({}));
-            }
-          } else if (options && options.method === 'DELETE') {
-            return new Response();
-          } else {
-            return new Response(
-              JSON.stringify([
-                { id: randomUUID(), name: 'test1' },
-                { id: randomUUID(), name: 'test2' },
-                { id: randomUUID(), name: 'test3' },
-              ])
-            );
-          }
-        }
-      );
+    deleteUserApiMock = vi
+      .spyOn(ApiClient.prototype, 'deleteUser')
+      .mockImplementation(async (id: string) => {
+        return {};
+      });
   });
   afterEach(() => {
-    fetchMock.mockRestore();
+    deleteUserApiMock.mockRestore();
   });
 
   test('resultとdeleteUserの関数を返すこと', () => {
@@ -58,17 +35,7 @@ describe('useDeleteUser', () => {
 
     act(() => result.current[1]({ id: userId, idToken: 'token' }));
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      `${process.env.VITE_API_BASE_URL}/api/v1/users/${userId}`,
-      {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer token`,
-        },
-        body: JSON.stringify({}),
-      }
-    );
+    expect(deleteUserApiMock).toHaveBeenCalledWith(expect.any(String));
 
     await waitFor(() => expect(result.current[0]).not.toBeUndefined());
 

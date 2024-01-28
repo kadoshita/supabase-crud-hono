@@ -3,41 +3,24 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { MockInstance, vi } from 'vitest';
 import { useFetchUsers } from '../../src/hooks/useFetchUsers';
 import { act } from 'react-dom/test-utils';
+import { ApiClient } from '../../src/libs/api';
 
 describe('useFetchUsers', () => {
-  let fetchMock: MockInstance;
+  let getUsersApiMock: MockInstance;
 
   beforeEach(() => {
-    fetchMock = vi
-      .spyOn(global, 'fetch')
-      .mockImplementation(
-        async (
-          input: Parameters<typeof fetch>[0],
-          options: Parameters<typeof fetch>[1]
-        ) => {
-          if (options && options.method === 'POST') {
-            if (options.body) {
-              const body = JSON.parse(options.body.toString());
-              return new Response(
-                JSON.stringify({ id: randomUUID(), name: body.name ?? '' })
-              );
-            } else {
-              return new Response(JSON.stringify({}));
-            }
-          } else {
-            return new Response(
-              JSON.stringify([
-                { id: randomUUID(), name: 'test1' },
-                { id: randomUUID(), name: 'test2' },
-                { id: randomUUID(), name: 'test3' },
-              ])
-            );
-          }
-        }
-      );
+    getUsersApiMock = vi
+      .spyOn(ApiClient.prototype, 'getUsers')
+      .mockImplementation(async () => {
+        return [
+          { id: randomUUID(), name: 'test1' },
+          { id: randomUUID(), name: 'test2' },
+          { id: randomUUID(), name: 'test3' },
+        ];
+      });
   });
   afterEach(() => {
-    fetchMock.mockRestore();
+    getUsersApiMock.mockRestore();
   });
 
   test('usersとfetchUsersの関数を返すこと', () => {
@@ -54,14 +37,7 @@ describe('useFetchUsers', () => {
 
     act(() => result.current[1]({ idToken: 'token' }));
 
-    expect(fetchMock).toHaveBeenCalledWith(
-      `${process.env.VITE_API_BASE_URL}/api/v1/users`,
-      {
-        headers: {
-          Authorization: `Bearer token`,
-        },
-      }
-    );
+    expect(getUsersApiMock).toHaveBeenCalled();
 
     await waitFor(() => expect(result.current[0].length).toBe(3));
 
