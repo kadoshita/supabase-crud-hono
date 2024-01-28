@@ -1,10 +1,10 @@
 import { Link, useLocation } from 'wouter';
-import LoginForm from '../components/form/LoginForm';
+import LoginForm, { SubmitValues } from '../components/form/LoginForm';
 import { useLogin } from '../hooks/useLogin';
 import { useEffect } from 'react';
 
 export default function Login() {
-  const [session, login] = useLogin();
+  const [session, loginWithEmail, loginWithGithub] = useLogin();
   const [_, setLocation] = useLocation();
 
   useEffect(() => {
@@ -13,8 +13,15 @@ export default function Login() {
     }
   });
 
-  const handleSubmit = (values: { email: string; password: string }) => {
-    login(values.email, values.password);
+  const handleSubmit = (values: SubmitValues) => {
+    switch (values.type) {
+      case 'email':
+        loginWithEmail(values.email, values.password);
+        break;
+      case 'github':
+        loginWithGithub();
+        break;
+    }
   };
 
   return (

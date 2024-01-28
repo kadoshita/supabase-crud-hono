@@ -4,11 +4,12 @@ import { supabase } from '../supabaseClient';
 
 export const useLogin = (): [
   Session | null,
-  (email: string, password: string) => void
+  (email: string, password: string) => void,
+  () => void
 ] => {
   const [session, setSession] = useState<Session | null>(null);
 
-  const login = (email: string, password: string) => {
+  const loginWithEmail = (email: string, password: string) => {
     supabase.auth
       .signInWithPassword({
         email,
@@ -24,5 +25,11 @@ export const useLogin = (): [
       });
   };
 
-  return [session, login];
+  const loginWithGithub = () => {
+    supabase.auth.signInWithOAuth({
+      provider: 'github',
+    });
+  };
+
+  return [session, loginWithEmail, loginWithGithub];
 };

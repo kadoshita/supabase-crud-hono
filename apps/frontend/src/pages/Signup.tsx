@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
-import LoginForm from '../components/form/LoginForm';
+import LoginForm, { SubmitValues } from '../components/form/LoginForm';
 import { useSignup } from '../hooks/useSignup';
 import { useLocation } from 'wouter';
 
 export default function Signup() {
-  const [session, signup] = useSignup();
+  const [session, signupWithEmail, signupWithGithub] = useSignup();
   const [_, setLocation] = useLocation();
 
   useEffect(() => {
@@ -13,8 +13,15 @@ export default function Signup() {
     }
   }, [session]);
 
-  const handleSubmit = (values: { email: string; password: string }) => {
-    signup(values.email, values.password);
+  const handleSubmit = (values: SubmitValues) => {
+    switch (values.type) {
+      case 'email':
+        signupWithEmail(values.email, values.password);
+        break;
+      case 'github':
+        signupWithGithub();
+        break;
+    }
   };
 
   return (
