@@ -1,11 +1,11 @@
-import { Session } from '@supabase/supabase-js';
+import { Provider, Session } from '@supabase/supabase-js';
 import { useState } from 'react';
 import { supabase } from '../supabaseClient';
 
 export const useSignup = (): [
   Session | null,
   (email: string, password: string) => void,
-  () => void
+  (provider: Provider) => void
 ] => {
   const [session, setSession] = useState<Session | null>(null);
 
@@ -25,11 +25,11 @@ export const useSignup = (): [
       });
   };
 
-  const signupWithGithub = () => {
+  const signupWithOAuth = (provider: Provider) => {
     supabase.auth.signInWithOAuth({
-      provider: 'github',
+      provider,
     });
   };
 
-  return [session, signupWithEmail, signupWithGithub];
+  return [session, signupWithEmail, signupWithOAuth];
 };

@@ -4,7 +4,7 @@ import { useLogin } from '../hooks/useLogin';
 import { useEffect } from 'react';
 
 export default function Login() {
-  const [session, loginWithEmail, loginWithGithub] = useLogin();
+  const [session, loginWithEmail, loginWithOAuth] = useLogin();
   const [_, setLocation] = useLocation();
 
   useEffect(() => {
@@ -19,7 +19,8 @@ export default function Login() {
         loginWithEmail(values.email, values.password);
         break;
       case 'github':
-        loginWithGithub();
+      case 'google':
+        loginWithOAuth(values.type);
         break;
     }
   };

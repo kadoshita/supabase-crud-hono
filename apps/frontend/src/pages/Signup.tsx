@@ -4,7 +4,7 @@ import { useSignup } from '../hooks/useSignup';
 import { useLocation } from 'wouter';
 
 export default function Signup() {
-  const [session, signupWithEmail, signupWithGithub] = useSignup();
+  const [session, signupWithEmail, signupWithOAuth] = useSignup();
   const [_, setLocation] = useLocation();
 
   useEffect(() => {
@@ -19,7 +19,8 @@ export default function Signup() {
         signupWithEmail(values.email, values.password);
         break;
       case 'github':
-        signupWithGithub();
+      case 'google':
+        signupWithOAuth(values.type);
         break;
     }
   };

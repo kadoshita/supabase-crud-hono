@@ -11,6 +11,10 @@ interface GithubFormValues {
   type: 'github';
 }
 
+interface GoogleFormValues {
+  type: 'google';
+}
+
 export type SubmitValues =
   | {
       type: 'email';
@@ -19,6 +23,9 @@ export type SubmitValues =
     }
   | {
       type: 'github';
+    }
+  | {
+      type: 'google';
     };
 
 export default function LoginForm({
@@ -36,6 +43,11 @@ export default function LoginForm({
   const githubForm = useForm<GithubFormValues>({
     initialValues: {
       type: 'github',
+    },
+  });
+  const googleForm = useForm<GoogleFormValues>({
+    initialValues: {
+      type: 'google',
     },
   });
 
@@ -74,6 +86,19 @@ export default function LoginForm({
         <Group justify="center" mt="md">
           <Button fullWidth color="dark" type="submit">
             GitHub
+          </Button>
+        </Group>
+      </form>
+
+      <form onSubmit={googleForm.onSubmit(handleSubmit)}>
+        <Input
+          type="hidden"
+          value="google"
+          {...googleForm.getInputProps('type')}
+        />
+        <Group justify="center" mt="md">
+          <Button fullWidth color="blue" type="submit">
+            Google
           </Button>
         </Group>
       </form>
