@@ -1,0 +1,44 @@
+{
+  "id": "4b88b5da-3261-4428-9528-e0e69ee0a2bd",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "5",
+  "dialect": "pg",
+  "tables": {
+    "users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "supabase-crud-test",
+  "version": "0.0.1",
+  "description": "SupabaseでCRUDを行うサンプルアプリ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "sublimer <sublimer.me@gmail.com> (https://sublimer.me/)",
+  "license": "MIT",
+  "workspaces": [
+    "apps/frontend",
+    "apps/backend"
+  ]
+}
