@@ -14,7 +14,7 @@ export const useFetchUsers = (): [
 
   const fetchUsers = ({ idToken }: { idToken: string }) => {
     const client = new ApiClient(idToken);
-    client.getUsers().then((data) => setUsers(data));
+    client.getUsers().then((data) => setUsers(data ?? []));
   };
 
   return [users, fetchUsers];

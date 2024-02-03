@@ -5,6 +5,22 @@
     "description": "Supabase CURD sample API",
     "version": "0.0.1"
   },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "user",
+      "description": "User related end-points"
+    }
+  ],
   "components": {
     "securitySchemes": {
       "bearerAuth": {
@@ -13,7 +29,27 @@
         "bearerFormat": "JWT"
       }
     },
-    "schemas": {}
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "54e1a86f-d786-4f9b-adb6-289cc3d9b17f"
+          },
+          "name": {
+            "type": "string",
+            "example": "John Doe"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      }
+    },
+    "parameters": {}
   },
   "paths": {
     "/api/v1/users": {
@@ -33,23 +69,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "description": "Successful response",
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "format": "uuid"
-                      },
-                      "name": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "name"
-                    ]
+                    "$ref": "#/components/schemas/User"
                   }
                 }
               }
@@ -59,15 +81,7 @@
             "description": "Unauthorized",
             "content": {
               "application/json": {
-                "schema": {
-                  "description": "Unauthorized",
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
+                "schema": {}
               }
             }
           }
@@ -78,50 +92,37 @@
           "user"
         ],
         "description": "Create user",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "name"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          },
-          "required": true
-        },
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "requestBody": {
+          "description": "User name",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "description": "Successful response",
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "name": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name"
-                  ]
+                  "$ref": "#/components/schemas/User"
                 }
               }
             }
@@ -130,15 +131,7 @@
             "description": "Unauthorized",
             "content": {
               "application/json": {
-                "schema": {
-                  "description": "Unauthorized",
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
+                "schema": {}
               }
             }
           }
@@ -151,20 +144,21 @@
           "user"
         ],
         "description": "Get user by id",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "schema": {
               "type": "string",
-              "format": "uuid"
+              "format": "uuid",
+              "example": "54e1a86f-d786-4f9b-adb6-289cc3d9b17f"
             },
-            "in": "path",
+            "required": true,
             "name": "id",
-            "required": true
-          }
-        ],
-        "security": [
-          {
-            "bearerAuth": []
+            "in": "path"
           }
         ],
         "responses": {
@@ -173,21 +167,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "description": "Successful response",
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
-                    },
-                    "name": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "name"
-                  ]
+                  "$ref": "#/components/schemas/User"
                 }
               }
             }
@@ -196,15 +176,15 @@
             "description": "Unauthorized",
             "content": {
               "application/json": {
-                "schema": {
-                  "description": "Unauthorized",
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           }
@@ -215,68 +195,37 @@
           "user"
         ],
         "description": "Delete user",
-        "parameters": [
-          {
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "in": "path",
-            "name": "id",
-            "required": true
-          }
-        ],
         "security": [
           {
             "bearerAuth": []
           }
         ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "54e1a86f-d786-4f9b-adb6-289cc3d9b17f"
+            },
+            "required": true,
+            "name": "id",
+            "in": "path"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "description": "Successful response",
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Successful response"
           },
           "401": {
             "description": "Unauthorized",
             "content": {
               "application/json": {
-                "schema": {
-                  "description": "Unauthorized",
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
+                "schema": {}
               }
             }
           }
         }
       }
     }
-  },
-  "servers": [
-    {
-      "url": "http://localhost:3000"
-    }
-  ],
-  "security": [
-    {
-      "bearerAuth": []
-    }
-  ],
-  "tags": [
-    {
-      "name": "user",
-      "description": "User related end-points"
-    }
-  ]
+  }
 }

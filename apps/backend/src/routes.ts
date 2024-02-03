@@ -1,194 +1,229 @@
-import { FastifyInstance, FastifyRegisterOptions } from 'fastify';
-import fastifySwagger from '@fastify/swagger';
-import { createUser, deleteUser, getUser, getUsers } from './controller/users';
-import { preHanderAuth } from './controller/common';
-import { writeFile } from 'fs/promises';
+import { logger } from 'hono/logger';
+import { cors } from 'hono/cors';
+import { z, OpenAPIHono, createRoute } from '@hono/zod-openapi';
+import { auth } from './controller/middleware';
+import { deps } from './dependencies';
+import { UserUsecase } from './usecase/userUsecase';
+import { writeFileSync } from 'fs';
+import { HTTPException } from 'hono/http-exception';
 
-export async function registerRoutes(server: FastifyInstance) {
-  if (process.env.NODE_ENV !== 'production') {
-    await server.register(fastifySwagger, {
-      openapi: {
-        info: {
-          title: 'Supabase CURD',
-          description: 'Supabase CURD sample API',
-          version: '0.0.1',
-        },
-        servers: [
-          {
-            url: 'http://localhost:3000',
-          },
-        ],
-        components: {
-          securitySchemes: {
-            bearerAuth: {
-              type: 'http',
-              scheme: 'bearer',
-              bearerFormat: 'JWT',
-            },
-          },
-        },
-        security: [
-          {
-            bearerAuth: [],
-          },
-        ],
-        tags: [
-          {
-            name: 'user',
-            description: 'User related end-points',
-          },
-        ],
-      },
-    });
-  }
+const userUsecase = new UserUsecase(deps.userRepository);
 
-  await server.addHook('preHandler', preHanderAuth);
-  await server.register(v1ApiRoutes, { prefix: '/api/v1' });
-  await server.ready();
-  const docs = await server.swagger();
-  await writeFile('docs/openapi.json', JSON.stringify(docs, null, 2), {
-    encoding: 'utf-8',
-  });
-}
-
-function v1ApiRoutes(
-  server: FastifyInstance,
-  _: FastifyRegisterOptions<{}>,
-  done: (err?: Error) => void
-) {
-  server.get(
-    '/users',
-    {
-      schema: {
-        description: 'Get all users',
-        tags: ['user'],
-        response: {
-          200: {
-            description: 'Successful response',
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                id: { type: 'string', format: 'uuid' },
-                name: { type: 'string' },
-              },
-              required: ['id', 'name'],
-            },
-          },
-          401: {
-            description: 'Unauthorized',
-            type: 'object',
-            properties: {
-              message: { type: 'string' },
-            },
-          },
-        },
-        security: [{ bearerAuth: [] }],
-      },
+const ParamsSchema = z.object({
+  id: z.string().openapi({
+    param: {
+      name: 'id',
+      in: 'path',
     },
-    getUsers
-  );
-  server.get(
-    '/users/:id',
-    {
-      schema: {
-        description: 'Get user by id',
-        tags: ['user'],
-        params: {
-          type: 'object',
-          properties: {
-            id: { type: 'string', format: 'uuid' },
+    format: 'uuid',
+    example: '54e1a86f-d786-4f9b-adb6-289cc3d9b17f',
+  }),
+});
+
+const UserSchema = z
+  .object({
+    id: z.string().openapi({
+      format: 'uuid',
+      example: '54e1a86f-d786-4f9b-adb6-289cc3d9b17f',
+    }),
+    name: z.string().openapi({
+      example: 'John Doe',
+    }),
+  })
+  .openapi('User');
+
+const app = new OpenAPIHono();
+app.use('/*', logger());
+app.use('/*', auth());
+app.use('/*', cors());
+
+app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
+  type: 'http',
+  scheme: 'bearer',
+  bearerFormat: 'JWT',
+});
+
+app
+  .openapi(
+    createRoute({
+      method: 'get',
+      path: '/api/v1/users',
+      tags: ['user'],
+      description: 'Get all users',
+      responses: {
+        200: {
+          description: 'Successful response',
+          content: {
+            'application/json': {
+              schema: UserSchema.array(),
+            },
           },
         },
-        response: {
-          200: {
-            description: 'Successful response',
-            type: 'object',
-            properties: {
-              id: { type: 'string', format: 'uuid' },
-              name: { type: 'string' },
-            },
-            required: ['id', 'name'],
-          },
-          401: {
-            description: 'Unauthorized',
-            type: 'object',
-            properties: {
-              message: { type: 'string' },
+        401: {
+          description: 'Unauthorized',
+          content: {
+            'application/json': {
+              schema: {},
             },
           },
         },
-        security: [{ bearerAuth: [] }],
       },
-    },
-    getUser
-  );
-  server.post(
-    '/users',
-    {
-      schema: {
-        description: 'Create user',
-        tags: ['user'],
+      security: [{ bearerAuth: [] }],
+    }),
+    async (c) => {
+      const users = await userUsecase.list();
+      return c.json(users);
+    }
+  )
+  .openapi(
+    createRoute({
+      method: 'post',
+      path: '/api/v1/users',
+      tags: ['user'],
+      description: 'Create user',
+      request: {
         body: {
-          type: 'object',
-          required: ['name'],
-          properties: {
-            name: { type: 'string' },
-          },
-        },
-        response: {
-          200: {
-            description: 'Successful response',
-            type: 'object',
-            properties: {
-              id: { type: 'string', format: 'uuid' },
-              name: { type: 'string' },
-            },
-            required: ['id', 'name'],
-          },
-          401: {
-            description: 'Unauthorized',
-            type: 'object',
-            properties: {
-              message: { type: 'string' },
+          description: 'User name',
+          content: {
+            'application/json': {
+              schema: z.object({
+                name: z.string(),
+              }),
             },
           },
+          required: true,
         },
-        security: [{ bearerAuth: [] }],
       },
-    },
-    createUser
-  );
-  server.delete(
-    '/users/:id',
-    {
-      schema: {
-        description: 'Delete user',
-        tags: ['user'],
-        params: {
-          type: 'object',
-          properties: {
-            id: { type: 'string', format: 'uuid' },
-          },
-        },
-        response: {
-          200: {
-            description: 'Successful response',
-            type: 'object',
-          },
-          401: {
-            description: 'Unauthorized',
-            type: 'object',
-            properties: {
-              message: { type: 'string' },
+      responses: {
+        200: {
+          description: 'Successful response',
+          content: {
+            'application/json': {
+              schema: UserSchema,
             },
           },
         },
-        security: [{ bearerAuth: [] }],
+        401: {
+          description: 'Unauthorized',
+          content: {
+            'application/json': {
+              schema: {},
+            },
+          },
+        },
       },
-    },
-    deleteUser
+      security: [{ bearerAuth: [] }],
+    }),
+    async (c) => {
+      const body = await c.req.json();
+      const user = await userUsecase.create(body.name);
+      return c.json(user);
+    }
   );
 
-  done();
-}
+app
+  .openapi(
+    createRoute({
+      method: 'get',
+      path: '/api/v1/users/{id}',
+      tags: ['user'],
+      description: 'Get user by id',
+      request: {
+        params: ParamsSchema,
+      },
+      responses: {
+        200: {
+          description: 'Successful response',
+          content: {
+            'application/json': {
+              schema: UserSchema,
+            },
+          },
+        },
+        401: {
+          description: 'Unauthorized',
+          content: {
+            'application/json': {
+              schema: {},
+            },
+          },
+        },
+        404: {
+          description: 'Not found',
+          content: {
+            'application/json': {
+              schema: {},
+            },
+          },
+        },
+      },
+      security: [{ bearerAuth: [] }],
+    }),
+    async (c) => {
+      const user = await userUsecase.get(c.req.param('id'));
+      if (user === null) {
+        throw new HTTPException(404, { message: 'User Not Found' });
+      }
+
+      return c.json(user);
+    }
+  )
+  .openapi(
+    createRoute({
+      method: 'delete',
+      path: '/api/v1/users/{id}',
+      tags: ['user'],
+      description: 'Delete user',
+      request: {
+        params: ParamsSchema,
+      },
+      responses: {
+        200: {
+          description: 'Successful response',
+        },
+        401: {
+          description: 'Unauthorized',
+          content: {
+            'application/json': {
+              schema: {},
+            },
+          },
+        },
+      },
+      security: [{ bearerAuth: [] }],
+    }),
+    async (c) => {
+      await userUsecase.delete(c.req.param('id'));
+      return c.json({});
+    }
+  );
+
+const docs = app.getOpenAPIDocument({
+  openapi: '3.0.3',
+  info: {
+    title: 'Supabase CURD',
+    description: 'Supabase CURD sample API',
+    version: '0.0.1',
+  },
+  servers: [
+    {
+      url: 'http://localhost:3000',
+    },
+  ],
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
+  tags: [
+    {
+      name: 'user',
+      description: 'User related end-points',
+    },
+  ],
+});
+writeFileSync('docs/openapi.json', JSON.stringify(docs, null, 2), {
+  encoding: 'utf-8',
+});
+
+export default app;

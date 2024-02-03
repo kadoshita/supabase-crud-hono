@@ -1,6 +1,6 @@
-# Supabase CURD
+# Supabase CURD Hono
 
-Supabase で CRUD を行うサンプルアプリ
+Supabase で CRUD を行うサンプルアプリの Hono 版
 
 ## Project
 
@@ -10,7 +10,7 @@ Supabase で CRUD を行うサンプルアプリ
 
 REST API サーバー
 
-- Fastify
+- Hono
 - OpenAPI
 - Drizzle ORM
 - Vitest

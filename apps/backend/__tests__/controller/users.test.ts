@@ -1,17 +1,14 @@
-import fastify from 'fastify';
-import { registerRoutes } from '../../src/routes';
 import { UserUsecase } from '../../src/usecase/userUsecase';
 import { UserRepository } from '../../src/infrastructure/repository/userRepository';
 import { randomUUID } from 'crypto';
 import { User } from '../../src/domain/user/user';
 import { vi, MockInstance } from 'vitest';
 import { AuthRepository } from '../../src/infrastructure/repository/authRepository';
-
-const app = fastify();
-registerRoutes(app);
+import app from '../../src/routes';
 
 describe('UsersController', () => {
   const userUsecase = new UserUsecase(new UserRepository());
+
   let authRepositoryAuthenticateSpy: MockInstance;
 
   beforeEach(async () => {
@@ -39,31 +36,27 @@ describe('UsersController', () => {
     });
 
     test('should return users', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: '/api/v1/users',
-        headers: {
-          authorization: 'Bearer token',
-        },
+      const response = await app.request('/api/v1/users', {
+        headers: { authorization: 'Bearer token' },
       });
-      expect(response.statusCode).toEqual(200);
-      expect(JSON.parse(response.body)).toEqual([user1, user2]);
+      expect(response.status).toEqual(200);
+      await expect(response.json()).resolves.toEqual([user1, user2]);
     });
   });
 
   describe('createUser', () => {
     test('should create user', async () => {
       const userName = randomUUID();
-      const response = await app.inject({
+      const response = await app.request('/api/v1/users', {
         method: 'POST',
-        url: '/api/v1/users',
         headers: {
           authorization: 'Bearer token',
+          'content-type': 'application/json',
         },
-        payload: { name: userName },
+        body: JSON.stringify({ name: userName }),
       });
-      expect(response.statusCode).toEqual(200);
-      expect(JSON.parse(response.body)).toEqual({
+      expect(response.status).toEqual(200);
+      await expect(response.json()).resolves.toEqual({
         id: expect.any(String),
         name: userName,
       });
@@ -81,15 +74,13 @@ describe('UsersController', () => {
     });
 
     test('should return user', async () => {
-      const response = await app.inject({
-        method: 'GET',
-        url: `/api/v1/users/${user.id}`,
+      const response = await app.request(`/api/v1/users/${user.id}`, {
         headers: {
           authorization: 'Bearer token',
         },
       });
-      expect(response.statusCode).toEqual(200);
-      expect(JSON.parse(response.body)).toEqual(user);
+      expect(response.status).toEqual(200);
+      await expect(response.json()).resolves.toEqual(user);
     });
   });
 
@@ -104,14 +95,13 @@ describe('UsersController', () => {
     });
 
     test('should delete user', async () => {
-      const response = await app.inject({
+      const response = await app.request(`/api/v1/users/${user.id}`, {
         method: 'DELETE',
-        url: `/api/v1/users/${user.id}`,
         headers: {
           authorization: 'Bearer token',
         },
       });
-      expect(response.statusCode).toEqual(200);
+      expect(response.status).toEqual(200);
     });
   });
 });

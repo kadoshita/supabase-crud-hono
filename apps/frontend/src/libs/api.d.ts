@@ -12,25 +12,20 @@ export interface paths {
         /** @description Successful response */
         200: {
           content: {
-            "application/json": {
-                /** Format: uuid */
-                id: string;
-                name: string;
-              }[];
+            "application/json": components["schemas"]["User"][];
           };
         };
         /** @description Unauthorized */
         401: {
           content: {
-            "application/json": {
-              message?: string;
-            };
+            "application/json": unknown;
           };
         };
       };
     };
     /** @description Create user */
     post: {
+      /** @description User name */
       requestBody: {
         content: {
           "application/json": {
@@ -42,19 +37,13 @@ export interface paths {
         /** @description Successful response */
         200: {
           content: {
-            "application/json": {
-              /** Format: uuid */
-              id: string;
-              name: string;
-            };
+            "application/json": components["schemas"]["User"];
           };
         };
         /** @description Unauthorized */
         401: {
           content: {
-            "application/json": {
-              message?: string;
-            };
+            "application/json": unknown;
           };
         };
       };
@@ -72,19 +61,19 @@ export interface paths {
         /** @description Successful response */
         200: {
           content: {
-            "application/json": {
-              /** Format: uuid */
-              id: string;
-              name: string;
-            };
+            "application/json": components["schemas"]["User"];
           };
         };
         /** @description Unauthorized */
         401: {
           content: {
-            "application/json": {
-              message?: string;
-            };
+            "application/json": unknown;
+          };
+        };
+        /** @description Not found */
+        404: {
+          content: {
+            "application/json": unknown;
           };
         };
       };
@@ -99,16 +88,12 @@ export interface paths {
       responses: {
         /** @description Successful response */
         200: {
-          content: {
-            "application/json": Record<string, never>;
-          };
+          content: never;
         };
         /** @description Unauthorized */
         401: {
           content: {
-            "application/json": {
-              message?: string;
-            };
+            "application/json": unknown;
           };
         };
       };
@@ -120,9 +105,19 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    User: {
+      /**
+       * Format: uuid
+       * @example 54e1a86f-d786-4f9b-adb6-289cc3d9b17f
+       */
+      id: string;
+      /** @example John Doe */
+      name: string;
+    };
   };
   responses: never;
-  parameters: never;
+  parameters: {
+  };
   requestBodies: never;
   headers: never;
   pathItems: never;

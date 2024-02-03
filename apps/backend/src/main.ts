@@ -1,8 +1,7 @@
-import fastify from 'fastify';
-import cors from '@fastify/cors';
+import { serve } from '@hono/node-server';
 
-import { registerRoutes } from './routes';
 import { config } from 'dotenv';
+import app from './routes';
 
 if (process.env.NODE_ENV !== 'production') {
   config({ path: '.env.local' });
@@ -10,14 +9,10 @@ if (process.env.NODE_ENV !== 'production') {
   config({ path: '.env.production' });
 }
 
-const app = fastify({
-  logger: true,
-});
-app.register(cors);
+const port = 3000;
+console.log(`Server is running on port ${port}`);
 
-registerRoutes(app);
-
-app.listen({ port: 3000 }, (err, address) => {
-  if (err) throw err;
-  app.log.info(`Server listening on ${address}`);
+serve({
+  fetch: app.fetch,
+  port,
 });

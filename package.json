@@ -1,7 +1,7 @@
 {
-  "name": "supabase-crud",
+  "name": "supabase-crud-hono",
   "version": "0.0.1",
-  "description": "SupabaseでCRUDを行うサンプルアプリ",
+  "description": "SupabaseでCRUDを行うサンプルアプリのhono版",
   "main": "index.js",
   "scripts": {
     "test": "npm -ws test"
